@@ -1,5 +1,6 @@
 from fastapi import FastAPI, File, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
 from fastmcp import Client
 import asyncio
@@ -55,6 +56,8 @@ async def chat(req: ChatRequest):
         mcp_client = app.state.mcp_client
     )
     return {"reply": reply}
+
+app.mount("/", StaticFiles(directory="frontend", html=True), name="frontend")
 
 if __name__ == "__main__":
     uvicorn.run(app, host="127.0.0.1", port=8080)
