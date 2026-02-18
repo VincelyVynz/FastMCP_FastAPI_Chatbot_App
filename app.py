@@ -13,7 +13,6 @@ MCP_SERVER_URL = "http://127.0.0.1:8000/mcp"
 
 app = FastAPI(title="File Assistant Chatbot")
 
-# Allow frontend to communicate
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
@@ -44,9 +43,9 @@ async def shutdown():
     await app.state.mcp_client.__aexit__(None, None, None)
 
 
-# ============================
+
 # File upload endpoint
-# ============================
+
 @app.post("/upload")
 async def upload_file(file: UploadFile = File(...)):
     upload_dir = "data"
@@ -59,9 +58,7 @@ async def upload_file(file: UploadFile = File(...)):
     return {"message": f"File {file.filename} uploaded successfully", "filename": file.filename}
 
 
-# ============================
 # Chat endpoint
-# ============================
 @app.post("/chat", response_model=ChatResponse)
 async def chat(req: ChatRequest):
     reply = await process_user_message(
@@ -72,14 +69,10 @@ async def chat(req: ChatRequest):
     return {"reply": reply}
 
 
-# ============================
 # Serve frontend safely
-# ============================
 # Mount frontend on /frontend to avoid conflicts with /upload or /chat
 app.mount("/frontend", StaticFiles(directory="frontend", html=True), name="frontend")
 
-# ============================
-# Run
-# ============================
+
 if __name__ == "__main__":
     uvicorn.run(app, host="127.0.0.1", port=8080)
