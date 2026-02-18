@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang = "en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FastMCP Chatbot</title>
+
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+    <header>
+        <h1>FastMCP Chat</h1>
+        <div class="file-section">
+            <label for="file-upload">RAG Files:</label>
+            <input type="file" id="file-upload">
+        </div>
+    </header>
+
+    <main id="chat-container">
+        <div id="chat-window">
+
+            <div class="message bot-message">Hello! I'm your FastMCP assistant. How can I help you with your files today?</div>
+            <div class="message user-message">Can you analyze the document I just uploaded?</div>
+            <div class="message bot-message">Certainly! I see the file in the RAG section. One moment...</div>
+            <div class="message user-message">Files uploaded</div>
+            <div class="message bot-message">Analyzing files. One moment...</div>
+
+
+
+        </div>
+
+    </main>
+
+    <footer>
+        <input type="text" id="user-input" placeholder="Type a message...">
+        <button id="send-btn">Send</button>
+    </footer>
+    <script src="/app.js"></script>
+
+</body>
+
+
+</html>

@@ -10,7 +10,7 @@ from tool_schemas import TOOLS
 load_dotenv()
 
 LLM_MODEL = getenv("LLM_MODEL")
-MAX_MEMORY = getenv("MAX_MEMORY")
+MAX_MEMORY = int(getenv("MAX_MEMORY"))
 
 groq_client = Groq(api_key=getenv("GROQ_API_KEY"))
 
