@@ -22,9 +22,12 @@ messages = [
     }
 ]
 
-async def process_user_message(user_input: str, mcp_client) -> str:
+async def process_user_message(user_input: str, mcp_client, filename: str = None) -> str:
+    if filename:
+        user_input = f"[Context: The user has uploaded a file named '{filename}'. If the user asks about 'the file', refer to this one.]\n\n{user_input}"
+
     messages.append({
-        "role": "system",
+        "role": "user",
         "content": user_input
     })
 
