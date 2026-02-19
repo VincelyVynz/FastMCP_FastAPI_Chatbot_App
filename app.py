@@ -9,7 +9,7 @@ import uvicorn
 
 from llm_agent import process_user_message
 
-MCP_SERVER_URL = "http://127.0.0.1:8000/mcp"
+MCP_SERVER_URL = "http://127.0.0.1:8080/mcp"
 
 app = FastAPI(title="File Assistant Chatbot")
 
@@ -75,4 +75,4 @@ app.mount("/frontend", StaticFiles(directory="frontend", html=True), name="front
 
 
 if __name__ == "__main__":
-    uvicorn.run(app, host="127.0.0.1", port=8080)
+    uvicorn.run(app, host="127.0.0.1", port=8000)

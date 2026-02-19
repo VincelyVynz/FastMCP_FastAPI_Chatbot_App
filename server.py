@@ -41,4 +41,4 @@ def read_excel(filepath: str):
 
 
 if __name__ == "__main__":
-    mcp.run(transport="http", host="127.0.0.1")
+    mcp.run(transport="http", host="127.0.0.1", port=8080)
