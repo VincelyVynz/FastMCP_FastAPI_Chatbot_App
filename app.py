@@ -43,21 +43,6 @@ async def shutdown():
     await app.state.mcp_client.__aexit__(None, None, None)
 
 
-
-# File upload endpoint
-
-@app.post("/upload")
-async def upload_file(file: UploadFile = File(...)):
-    upload_dir = "data"
-    os.makedirs(upload_dir, exist_ok=True)
-
-    file_path = os.path.join(upload_dir, file.filename)
-    with open(file_path, "wb") as f:
-        f.write(await file.read())
-
-    return {"message": f"File {file.filename} uploaded successfully", "filename": file.filename}
-
-
 # Chat endpoint
 @app.post("/chat", response_model=ChatResponse)
 async def chat(req: ChatRequest):
@@ -70,8 +55,8 @@ async def chat(req: ChatRequest):
 
 
 # Serve frontend safely
-# Mount frontend on /frontend to avoid conflicts with /upload or /chat
-app.mount("/frontend", StaticFiles(directory="frontend", html=True), name="frontend")
+# Mount frontend on / to avoid conflicts with /upload or /chat
+app.mount("/", StaticFiles(directory="frontend", html=True), name="static")
 
 
 if __name__ == "__main__":

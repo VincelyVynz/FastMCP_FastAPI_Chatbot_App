@@ -31,37 +31,24 @@ function addMessage(text, sender) {
 }
 
 // ============================
-// File Upload Handler
+// File Selection Handler
 // ============================
-fileInput.addEventListener("change", async (e) => {
+fileInput.addEventListener("change", (e) => {
     const file = e.target.files[0];
-    if (!file) return;
-
-    const formData = new FormData();
-    formData.append("file", file);
-
-    try {
-        const res = await fetch("http://127.0.0.1:8000/upload", {
-            method: "POST",
-            body: formData
-        });
-
-        if (!res.ok) throw new Error("Upload failed");
-
-        const data = await res.json();
-        currentFile = data.filename;
-
-        fileLabel.textContent = `RAG File: ${file.name}`;
-        addMessage(`📁 File uploaded: ${file.name}. You can now ask questions about it.`, "bot");
-
-        input.focus(); // Refocus after upload
-
-    } catch (err) {
-        console.error("Upload error:", err);
-        addMessage("⚠️ Error uploading file. Check backend.", "bot");
-        input.focus();
+    if (!file) {
+        currentFile = null;
+        fileLabel.textContent = "RAG Files:";
+        return;
     }
+
+    currentFile = file.name; // Just store the name
+
+    fileLabel.textContent = `RAG File: ${file.name}`;
+    addMessage(`📁 File selected: ${file.name}. The file will be sent with your next message.`, "bot");
+
+    input.focus();
 });
+
 
 // ============================
 // Send Message
@@ -70,7 +57,7 @@ async function sendMessage() {
     if (isLoading) return; // Prevent spam clicks
 
     const message = input.value.trim();
-    if (!message) return;
+    if (!message && !currentFile) return;
 
     isLoading = true;
     sendBtn.disabled = true;
@@ -97,6 +84,12 @@ async function sendMessage() {
         console.error("Chat error:", err);
         addMessage("⚠️ Server error. Check backend.", "bot");
     }
+
+    // Clear the file after sending
+    currentFile = null;
+    fileInput.value = ""; // Reset the file input
+    fileLabel.textContent = "RAG Files:";
+
 
     isLoading = false;
     sendBtn.disabled = false;
