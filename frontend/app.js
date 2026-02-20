@@ -41,7 +41,7 @@ fileInput.addEventListener("change", (e) => {
         return;
     }
 
-    currentFile = file.name; // Just store the name
+    currentFile = file; // Store the entire File object, not just the name
 
     fileLabel.textContent = `RAG File: ${file.name}`;
     addMessage(`📁 File selected: ${file.name}. The file will be sent with your next message.`, "bot");
@@ -54,7 +54,7 @@ fileInput.addEventListener("change", (e) => {
 // Send Message
 // ============================
 async function sendMessage() {
-    if (isLoading) return; // Prevent spam clicks
+    if (isLoading) return;
 
     const message = input.value.trim();
     if (!message && !currentFile) return;
@@ -65,14 +65,18 @@ async function sendMessage() {
     addMessage(message, "user");
     input.value = "";
 
+    const formData = new FormData();
+    formData.append("message", message);
+
+    // Append the actual file if it exists
+    if (currentFile) {
+        formData.append("file", currentFile, currentFile.name);
+    }
+
     try {
-        const res = await fetch("http://127.0.0.1:8000/chat", {
+        const res = await fetch("/chat", {
             method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-                message: message,
-                filename: currentFile
-            })
+            body: formData // Send as form data
         });
 
         if (!res.ok) throw new Error("Chat request failed");
