@@ -1,6 +1,6 @@
 /* style.css */
 
-*{
+* {
     box-sizing: border-box;
     margin: 0;
     padding: 0;
@@ -87,6 +87,29 @@ footer #send-btn {
 
 #file-upload {
     color: #bbb;
+}
+
+#selected-file-name {
+    color: #007bff;
+    font-weight: bold;
+    max-width: 200px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+#unchoose-file {
+    padding: 5px 10px;
+    background-color: #dc3545;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 12px;
+}
+
+#unchoose-file:hover {
+    background-color: #c82333;
 }
 
 #chat-container {

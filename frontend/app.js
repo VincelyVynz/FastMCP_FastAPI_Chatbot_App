@@ -1,116 +1,81 @@
-window.addEventListener("beforeunload", () => {
-    console.log("REAL PAGE RELOAD");
-});
+document.addEventListener('DOMContentLoaded', () => {
+    const chatWindow = document.getElementById('chat-window');
+    const userInput = document.getElementById('user-input');
+    const sendBtn = document.getElementById('send-btn');
+    const fileUpload = document.getElementById('file-upload');
+    const selectedFileName = document.getElementById('selected-file-name');
+    const unchooseFileBtn = document.getElementById('unchoose-file');
 
+    let selectedFile = null;
 
-const sendBtn = document.getElementById("send-btn");
-const input = document.getElementById("user-input");
-const chatWindow = document.getElementById("chat-window");
-const fileInput = document.getElementById("file-upload");
-const fileLabel = document.querySelector("label[for='file-upload']");
+    // Handle file selection
+    fileUpload.addEventListener('change', (e) => {
+        const file = e.target.files[0];
+        if (file) {
+            selectedFile = file;
+            selectedFileName.textContent = file.name;
+            unchooseFileBtn.style.display = 'inline-block';
+        }
+    });
 
-let currentFile = null;
-let isLoading = false;
+    // Handle unchoose file
+    unchooseFileBtn.addEventListener('click', () => {
+        selectedFile = null;
+        fileUpload.value = ''; // Reset file input
+        selectedFileName.textContent = 'No file chosen';
+        unchooseFileBtn.style.display = 'none';
+    });
 
-// ============================
-// Focus input on page load
-// ============================
-window.addEventListener("load", () => {
-    input.focus();
-});
+    // Handle sending message
+    const sendMessage = async () => {
+        const message = userInput.value.trim();
+        if (!message) return;
 
-// ============================
-// Add message to chat
-// ============================
-function addMessage(text, sender) {
-    const div = document.createElement("div");
-    div.className = `message ${sender}-message`;
-    div.textContent = text;
-    chatWindow.appendChild(div);
-    chatWindow.scrollTop = chatWindow.scrollHeight;
-}
+        // Display user message
+        appendMessage('user', message);
+        userInput.value = '';
 
-// ============================
-// File Selection Handler
-// ============================
-fileInput.addEventListener("change", (e) => {
-    const file = e.target.files[0];
-    if (!file) {
-        currentFile = null;
-        fileLabel.textContent = "RAG Files:";
-        return;
-    }
+        try {
+            const formData = new FormData();
+            formData.append('message', message);
+            if (selectedFile) {
+                formData.append('file', selectedFile);
+            }
 
-    currentFile = file; // Store the entire File object, not just the name
+            const response = await fetch('/chat', {
+                method: 'POST',
+                body: formData
+            });
 
-    fileLabel.textContent = `RAG File: ${file.name}`;
-    addMessage(`📁 File selected: ${file.name}. The file will be sent with your next message.`, "bot");
+            if (!response.ok) {
+                throw new Error('Network response was not ok');
+            }
 
-    input.focus();
-});
+            const data = await response.json();
+            appendMessage('bot', data.reply);
+        } catch (error) {
+            console.error('Error:', error);
+            appendMessage('bot', 'Sorry, something went wrong.');
+        }
+    };
 
+    const appendMessage = (role, text) => {
+        const messageDiv = document.createElement('div');
+        messageDiv.classList.add('message');
+        messageDiv.classList.add(role === 'user' ? 'user-message' : 'bot-message');
+        messageDiv.textContent = text;
+        chatWindow.appendChild(messageDiv);
 
-// ============================
-// Send Message
-// ============================
-async function sendMessage() {
-    if (isLoading) return;
+        // Scroll to bottom
+        const chatContainer = document.getElementById('chat-container');
+        chatContainer.scrollTop = chatContainer.scrollHeight;
+    };
 
-    const message = input.value.trim();
-    if (!message && !currentFile) return;
+    sendBtn.addEventListener('click', sendMessage);
 
-    isLoading = true;
-    sendBtn.disabled = true;
-
-    addMessage(message, "user");
-    input.value = "";
-
-    const formData = new FormData();
-    formData.append("message", message);
-
-    // Append the actual file if it exists
-    if (currentFile) {
-        formData.append("file", currentFile, currentFile.name);
-    }
-
-    try {
-        const res = await fetch("/chat", {
-            method: "POST",
-            body: formData // Send as form data
-        });
-
-        if (!res.ok) throw new Error("Chat request failed");
-
-        const data = await res.json();
-        addMessage(data.reply || "⚠️ No response from server.", "bot");
-
-    } catch (err) {
-        console.error("Chat error:", err);
-        addMessage("⚠️ Server error. Check backend.", "bot");
-    }
-
-    // Clear the file after sending
-    currentFile = null;
-    fileInput.value = ""; // Reset the file input
-    fileLabel.textContent = "RAG Files:";
-
-
-    isLoading = false;
-    sendBtn.disabled = false;
-    input.focus(); // Refocus after sending
-}
-
-// ============================
-// Button Click
-// ============================
-sendBtn.addEventListener("click", sendMessage);
-
-// ============================
-// Enter Key = Send
-// ============================
-input.addEventListener("keydown", (e) => {
-    if (e.key === "Enter" && !e.shiftKey) {
-        e.preventDefault(); // Prevent newline
-        sendMessage();
-    }
+    userInput.addEventListener('keypress', (e) => {
+        if (e.key === 'Enter') {
+            sendMessage();
+        }
+    });
 });
