@@ -1,16 +1,27 @@
-import sqlite3
+import pyodbc
 
-DATABASE_NAME = 'users.db'
+# SQL Server connection string
+CONNECTION_STRING = (
+    "DRIVER={ODBC Driver 17 for SQL Server};"
+    "SERVER=localhost;"
+    "DATABASE=MyDatabase;"
+    "Trusted_Connection=yes;"
+)
 
 # Custom exceptions
 class UserNotFoundError(Exception):
     pass
 
+
+def get_connection():
+    return pyodbc.connect(CONNECTION_STRING)
+
+
 def get_user_by_id(user_id: int):
-    conn = sqlite3.connect(DATABASE_NAME)
+    conn = get_connection()
     cursor = conn.cursor()
     cursor.execute(
-        "SELECT * FROM users WHERE id = ?",
+        "SELECT * FROM Users WHERE id = ?",
         (user_id,)
     )
     user = cursor.fetchone()
@@ -21,22 +32,24 @@ def get_user_by_id(user_id: int):
 
     return user
 
+
 def add_new_user(username: str, email: str, country: str):
-    conn = sqlite3.connect(DATABASE_NAME)
+    conn = get_connection()
     cursor = conn.cursor()
     cursor.execute(
-        "INSERT INTO users(username, email, country) VALUES (?, ?, ?)",
+        "INSERT INTO Users (username, email, country) VALUES (?, ?, ?)",
         (username, email, country)
     )
     conn.commit()
     conn.close()
 
+
 def delete_user(user_id: int):
     try:
-        conn = sqlite3.connect(DATABASE_NAME)
+        conn = get_connection()
         cursor = conn.cursor()
         cursor.execute(
-            "DELETE FROM users WHERE id = ?",
+            "DELETE FROM Users WHERE id = ?",
             (user_id,)
         )
         conn.commit()
@@ -47,35 +60,35 @@ def delete_user(user_id: int):
 
 
 def get_all_users():
-    conn = sqlite3.connect(DATABASE_NAME)
+    conn = get_connection()
     cursor = conn.cursor()
-    cursor.execute(
-        "SELECT * FROM users"
-    )
+    cursor.execute("SELECT * FROM Users")
     users = cursor.fetchall()
     conn.close()
+
     if len(users) == 0:
         return "Database accessed successfully. The users table is currently empty."
+
     return {"status": "success", "users": users}
+
 
 def delete_duplicate_users():
     try:
-        conn = sqlite3.connect(DATABASE_NAME)
+        conn = get_connection()
         cursor = conn.cursor()
         cursor.execute(
             """
-            DELETE FROM users
+            DELETE FROM Users
             WHERE id NOT IN (
                 SELECT MIN(id)
-                FROM users
-                GROUP BY  email
-                )
+                FROM Users
+                GROUP BY email
+            )
             """
         )
         deleted_counts = cursor.rowcount
         conn.commit()
         conn.close()
         return {"status": "success", "deleted_duplicates": deleted_counts}
-
     except Exception as e:
         return f"Error deleting duplicate users. Error: {e}"
